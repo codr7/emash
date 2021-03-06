@@ -1,28 +1,60 @@
 (defpackage emash
   (:use cl)
-  (:import-from whirlog do-context let-tables with-db)
+  (:import-from whirlog column-value do-context find-record let-tables new-record store-record with-db)
   (:export start))
 
 (in-package emash)
 
+(defparameter *default-smtp-account* :default-smtp-account)
+
+(defvar *settings*)
+(defvar *smtp-accounts*)
+
+(defun find-setting (key)
+  (column-value (find-record *settings* `(,key)) 'value))
+
+(defun (setf find-setting) (val key)
+  (store-record *settings* (new-record 'key key 'value val)))
+  
+(defun ask (prompt)
+  (format t prompt)
+  (read-line *standard-input* nil))
+
+(defun ask-y/n (prompt &key (default nil))
+  (let ((in (ask (format nil "~a (~a/~a)? " prompt (if default "[y]" "y") (if default "n" "[n]")))))
+    (cond
+      ((or (string= in "y") (and default (string= in "")))
+       t)
+      ((or (string= in "n") (and (not default) (string= in "")))
+       nil)
+      (t
+       (ask-y/n prompt :default default)))))
+
 (defparameter *commands*
-  `(("add-account" . ,(lambda ()
-			(format t "Adding account...~%")))))
+  `(("add-smtp-account" . ,(lambda ()
+			     (let ((e-mail (ask "e-mail: ")))
+			       (ask "host: ")
+			       (ask "port: ")
+			       (ask "user: ")
+			       (ask "password: ")
+			       (when (ask-y/n "make default")
+				 (setf (find-setting *default-smtp-account*) e-mail)))))))
+				     
 
 (defun find-command (x)
   (rest (assoc x *commands* :test #'string=)))
 
 (defun start ()
-  (let-tables ((smtp-accounts (e-mail :primary-key? t) address user password))
-    (with-db ("db/" smtp-accounts)
+  (let-tables ((*settings* (key :primary-key? t) value)
+	       (*smtp-accounts* (e-mail :primary-key? t) host port user password))
+    (with-db ("db/" *settings* *smtp-accounts*)
       (tagbody
        next
-	 (format t "emash> ")
-	 (let ((in (read-line *standard-input* nil)))
+	 (let ((in (ask "emash> ")))
            (when (and in (not (string= in "")))
 	     (let ((c (find-command in)))
 	       (if c
 		   (do-context () (funcall c))
-		   (format t "Unknown command: ~a~%" in)))
+		   (format t "unknown command: ~a~%" in)))
 	     (go next))))
-      (format t "Quitting...~%"))))
+      (format t "over, out!~%"))))
