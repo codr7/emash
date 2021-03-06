@@ -49,7 +49,7 @@
 (defun start ()
   (let-tables ((*settings* (key :primary-key? t) value)
 	       (*smtp-accounts* (e-mail :primary-key? t) host port user password))
-    (with-db ("db/" *settings* *smtp-accounts*)
+    (with-db (nil *settings* *smtp-accounts*)
       (tagbody
        next
 	 (let ((in (ask "emash> ")))
