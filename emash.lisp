@@ -5,17 +5,17 @@
 
 (in-package emash)
 
-(defparameter *default-smtp-account* :default-smtp-account)
-
 (defvar *settings*)
 (defvar *smtp-accounts*)
+
+(defparameter *default-smtp-account* :default-smtp-account)
 
 (defun find-setting (key)
   (column-value (find-record *settings* `(,key)) 'value))
 
 (defun (setf find-setting) (val key)
   (store-record *settings* (new-record 'key key 'value val)))
-  
+
 (defun ask (prompt)
   (format t prompt)
   (read-line *standard-input* nil))
@@ -37,9 +37,11 @@
 			       (ask "port: ")
 			       (ask "user: ")
 			       (ask "password: ")
+			       (format t "created SMTP account: '~a'~%" e-mail)
 			       (when (ask-y/n "make default")
-				 (setf (find-setting *default-smtp-account*) e-mail)))))))
-				     
+				 (setf (find-setting *default-smtp-account*) e-mail)
+				 (format t "'~a' is default SMTP account~%" e-mail)))))))
+
 
 (defun find-command (x)
   (rest (assoc x *commands* :test #'string=)))
