@@ -1,0 +1,3 @@
+* connect to smtp via libcurl/cffi
+* connect to imap
+** add imap-accounts table
