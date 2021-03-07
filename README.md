@@ -3,7 +3,8 @@ Running/building emash from source requires [SBCL](http://sbcl.org/), [libcurl](
 
 ### add smtp
 emash embraces the idea of multiple smtp accounts, add as many as you like.
-all settings are stored in a database rooted in the current working directory.
+
+All settings are stored in a database rooted in the current working directory.
 
 ```
 emash> add-smtp
