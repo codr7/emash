@@ -26,11 +26,11 @@ make default [y]/n? y
 foo@gmail.com is default smtp
 ```
 
-### send e-mail
+### post e-mail
 The message is sent automagically when an empty line is entered in the body.
 
 ```
-emash> send
+emash> post
 1) foo@gmail.com
 from 1-1 [foo@gmail.com]:
 to: bar@gmail.com
@@ -38,7 +38,6 @@ subject: testing
 body:
 1 2 3
 
-sending now
-ok
+ok, posted
 emash>
 ```

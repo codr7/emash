@@ -1,3 +1,9 @@
+* move send to background thread
+** add table posts
+*** store in command
+** add send command
+*** start new thread
+*** drain posts table
 * add contacts table
 ** loop to-list
 *** display list of matching contacts unless exact match

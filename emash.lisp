@@ -97,13 +97,13 @@
 			     (setf (find-setting *default-smtp*) e-mail)))
 			 (when (string= (find-setting *default-smtp*) e-mail)
 			   (say "~a is default smtp" e-mail)))))))
-    (:send . ,(lambda ()
+    (:post . ,(lambda ()
 		(let ((from (ask-list "from" (list-smtps) :default (find-setting *default-smtp*)))
 		      (to (mapcar #'symbol-name (read-list (ask-string "to"))))
 		      (subj (ask-string "subject"))
 		      (body (ask-text "body")))
-		  (format t "to: ~a~%" to)
-		  (say "sending now")
+		  (say "ok, posted")
+		  
 		  (let ((smtp (find-record *smtps* `(,from))))  
 		    (curl:do-handle (h)
 		      (smtp:send-message h
@@ -114,8 +114,7 @@
 					 :from from
 					 :to to
 					 :subject subj
-					 :body body)
-		      (say "ok"))))))))
+					 :body body))))))))
 
 (defun find-command (x)
   (rest (assoc x *commands*)))
