@@ -1,13 +1,2 @@
-* smtp
-** finish send command
-*** add ask-list
-*** add receiver
-*** add subject
-*** add body
-*** call send-message
-** extract test 
-** commit
-* read values from repl input
-** change mapping from strings to symbols
 * connect to imap
 ** add imap-accounts table
