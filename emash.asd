@@ -7,4 +7,4 @@
   :licence "MIT"
   :depends-on ("cffi" "whirlog")
   :serial t
-  :components ((:file "emash")))
+  :components ((:file "util") (:file "curl") (:file "smtp") (:file "emash")))
