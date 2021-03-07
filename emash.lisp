@@ -20,11 +20,13 @@
 (defun white (&optional out)
   (term:fcolor #xd9 #xd2 #xc6 out))
 
+(defun grey (&optional out)
+  (term:fcolor #xbf #xb1 #xa8 out))
+
 (defun ask-line (prompt)
-  (white t)
+  (grey t)
   (format t prompt)
-  (term:reset t)
-  
+  (white t)
   (force-output)
   (read-line *standard-input* nil))
 
@@ -33,9 +35,9 @@
     (if (string= res "") default res)))
 
 (defun ask-text (prompt)
-  (white t)
+  (grey t)
   (say "~a:" prompt)
-  (term:reset t)
+  (white t)
   (force-output)
   
   (with-output-to-string (out)
@@ -67,17 +69,12 @@
   (force-output))
 
 (defun say-ok (spec &rest args)
-  (term:fcolor #xb7 #xb1 #x83 t )
-  (apply #'say spec args)
-  (term:reset t))
-
-(defun say-proc (spec &rest args)
-  (term:fcolor #xed #x80 #x08 t )
+  (term:fcolor #xc0 #x9c #x6f t )
   (apply #'say spec args)
   (term:reset t))
 
 (defun say-error (spec &rest args)
-  (term:fcolor #xbf #x1b #x1b t )
+  (term:fcolor #xbf #x7c #x2a t )
   (apply #'say spec args)
   (term:reset t))
    
@@ -143,11 +140,12 @@
   (rest (assoc x *commands*)))
 
 (defun start ()
+  (say-ok "hello")
+  
   (let-tables ((*settings* (key :primary-key? t) value)
 	       (*smtps* (e-mail :primary-key? t) host port user password))
     (let ((*package* (find-package 'emash)))
-      (with-db ("./" *settings* *smtps*)
-	(say-ok "hello")
+      (with-db ("./" *settings* *smtps*)	
 	(tagbody
 	 next
 	   (let ((in (ask-line "emash> ")))
@@ -158,5 +156,7 @@
 		   (if c
 		       (do-context () (funcall c))
 		       (say-error "unknown: ~a" cid)))
-		 (go next)))))))
-    (say-ok "bye")))
+		 (go next))))))))
+
+  (say-ok "bye")
+  (term:reset t))
