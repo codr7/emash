@@ -1,6 +1,7 @@
 * move send to background thread
 ** add table posts
 *** store in command
+** add tasks table logging background active tasks
 ** add send command
 *** start new thread
 *** drain posts table

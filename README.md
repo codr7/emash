@@ -27,7 +27,7 @@ foo@gmail.com is default smtp
 ```
 
 ### post e-mail
-The message is sent automagically when an empty line is entered in the body.
+The message is posted as soon as an empty line is entered in the body.
 
 ```
 emash> post
