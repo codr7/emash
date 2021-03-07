@@ -17,8 +17,14 @@
 (defun (setf find-setting) (val key)
   (store-record *settings* (new-record 'key key 'value val)))
 
+(defun white (&optional out)
+  (term:fcolor #xd9 #xd2 #xc6 out))
+
 (defun ask-line (prompt)
+  (white t)
   (format t prompt)
+  (term:reset t)
+  
   (force-output)
   (read-line *standard-input* nil))
 
@@ -27,7 +33,9 @@
     (if (string= res "") default res)))
 
 (defun ask-text (prompt)
-  (format t "~a:~%" prompt)
+  (white t)
+  (say "~a:" prompt)
+  (term:reset t)
   (force-output)
   
   (with-output-to-string (out)
@@ -58,6 +66,21 @@
   (terpri)
   (force-output))
 
+(defun say-ok (spec &rest args)
+  (term:fcolor #xb7 #xb1 #x83 t )
+  (apply #'say spec args)
+  (term:reset t))
+
+(defun say-proc (spec &rest args)
+  (term:fcolor #xed #x80 #x08 t )
+  (apply #'say spec args)
+  (term:reset t))
+
+(defun say-error (spec &rest args)
+  (term:fcolor #xbf #x1b #x1b t )
+  (apply #'say spec args)
+  (term:reset t))
+   
 (defun list-smtps ()
   (let (out (i 0))
     (do-records (rec *smtps*)
@@ -91,18 +114,18 @@
 							   'user user
 							   'password password))
 			 
-			 (say "~a smtp ~a" (if prev "updated" "created") e-mail)
+			 (say-ok "~a smtp ~a" (if prev "updated" "created") e-mail)
 			 (unless (string= (find-setting *default-smtp*) e-mail)
 			   (when (ask-y/n "make default" :default t)
 			     (setf (find-setting *default-smtp*) e-mail)))
 			 (when (string= (find-setting *default-smtp*) e-mail)
-			   (say "~a is default smtp" e-mail)))))))
+			   (say-ok "~a is default smtp" e-mail)))))))
     (:post . ,(lambda ()
 		(let ((from (ask-list "from" (list-smtps) :default (find-setting *default-smtp*)))
 		      (to (mapcar #'symbol-name (read-list (ask-string "to"))))
 		      (subj (ask-string "subject"))
 		      (body (ask-text "body")))
-		  (say "ok, posted")
+		  (say-ok "posted-message")
 		  
 		  (let ((smtp (find-record *smtps* `(,from))))  
 		    (curl:do-handle (h)
@@ -124,6 +147,7 @@
 	       (*smtps* (e-mail :primary-key? t) host port user password))
     (let ((*package* (find-package 'emash)))
       (with-db ("./" *settings* *smtps*)
+	(say-ok "welcome")
 	(tagbody
 	 next
 	   (let ((in (ask-line "emash> ")))
@@ -133,6 +157,6 @@
 			(c (find-command (kw cid))))
 		   (if c
 		       (do-context () (funcall c))
-		       (say "unknown: ~a" cid)))
+		       (say-error "unknown: ~a" cid)))
 		 (go next)))))))
-    (format t "over, out~%")))
+    (say-ok "bye")))

@@ -10,4 +10,4 @@
   :entry-point "emash:start"
   :depends-on ("cffi" "whirlog")
   :serial t
-  :components ((:file "util") (:file "curl") (:file "smtp") (:file "emash")))
+  :components ((:file "util") (:file "curl") (:file "smtp") (:file "term") (:file "emash")))
