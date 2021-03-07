@@ -41,7 +41,11 @@
   (curl:ok? (curl:setopt h :readfunction :pointer (callback read-message)))
   (curl:ok? (curl:setopt h :upload :long 1))
 
-  (let ((rcpt (curl-slist-append (null-pointer) to)))
+  
+  (let ((rcpt (null-pointer)))
+    (dolist (email to)
+      (setf rcpt (curl-slist-append rcpt email)))
+
     (curl:ok? (curl:setopt h :mail-rcpt :pointer rcpt))
     
     (with-foreign-string ((mptr msize) (with-output-to-string (msg)

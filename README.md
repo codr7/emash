@@ -2,7 +2,8 @@
 Running/building emash from source requires [SBCL](http://sbcl.org/), [libcurl](https://curl.se/libcurl/), [cffi](https://common-lisp.net/project/cffi/) and [whirlog](https://github.com/codr7/whirlog).
 
 ### add smtp
-emash embraces the idea of multiple smtp accounts, add as many as you want.
+emash embraces the idea of multiple smtp accounts, add as many as you like.
+all settings are stored in a database rooted in the current working directory.
 
 ```
 emash> add-smtp

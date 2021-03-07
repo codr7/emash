@@ -1,5 +1,2 @@
-* add contacts table
-** ask if add on send if not exists
-*** default y
 * connect to imap
 ** add imaps table

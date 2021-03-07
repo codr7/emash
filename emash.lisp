@@ -67,6 +67,17 @@
 	(push e-mail out)))
     (nreverse out)))
 
+(defun read-list (s)
+  (let (out)
+    (with-input-from-string (in s)
+      (tagbody
+       next
+	 (let ((v (read in nil)))
+	   (when v
+	     (push v out)
+	     (go next)))))
+    (nreverse out)))
+
 (defparameter *commands*
   `((:add-smtp . ,(lambda ()
 		   (let ((e-mail (ask-string "e-mail")))
@@ -89,9 +100,10 @@
 			   (say "~a is default smtp" e-mail)))))))
     (:send . ,(lambda ()
 		(let ((from (ask-list "from" (list-smtps) :default (find-setting *default-smtp*)))
-		      (to (ask-string "to"))
+		      (to (mapcar #'symbol-name (read-list (ask-string "to"))))
 		      (subj (ask-string "subject"))
 		      (body (ask-text "body")))
+		  (format t "to: ~a~%" to)
 		  (say "sending now")
 		  (let ((smtp (find-record *smtps* `(,from))))  
 		    (curl:do-handle (h)
