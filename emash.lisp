@@ -10,6 +10,7 @@
 (defvar *smtps*)
 
 (defparameter *default-smtp* :default-smtp)
+(defparameter *editor* :editor)
 
 (defun find-setting (key)
   (column-value (find-record *settings* `(,key)) 'value))
@@ -19,11 +20,25 @@
 
 (defun ask-line (prompt)
   (format t prompt)
+  (force-output)
   (read-line *standard-input* nil))
 
 (defun ask-string (prompt &key default)
   (let ((res (ask-line (format nil "~a~a: " prompt (if default (format nil " [~a]" default) "")))))
     (if (string= res "") default res)))
+
+(defun ask-text (prompt)
+  (format t "~a:~%" prompt)
+  (force-output)
+  
+  (with-output-to-string (out)
+    (tagbody
+     next
+       (let ((res (read-line *standard-input* nil)))
+	 (unless (string= res "")
+	   (write-string res out)
+	   (terpri out)
+	   (go next))))))
 
 (defun ask-list (prompt lst &key default)
   (let ((res (ask-string (format nil "~a ~a-~a" prompt (if lst 1 0) (if lst (length lst) 0)) :default default)))
@@ -43,6 +58,14 @@
   (apply #'format t spec args)
   (terpri)
   (force-output))
+
+(defun list-smtps ()
+  (let (out (i 0))
+    (do-records (rec *smtps*)
+      (let ((e-mail (column-value rec 'e-mail)))
+	(say "~a) ~a" (incf i) e-mail)
+	(push e-mail out)))
+    (nreverse out)))
 
 (defparameter *commands*
   `((:add-smtp . ,(lambda ()
@@ -65,28 +88,23 @@
 			 (when (string= (find-setting *default-smtp*) e-mail)
 			   (say "~a is default smtp" e-mail)))))))
     (:send . ,(lambda ()
-	       (let (smtps (i 0))
-		 (do-records (rec *smtps*)
-		   (let ((e-mail (column-value rec 'e-mail)))
-		     (say "~a) ~a" (incf i) e-mail)
-		     (push e-mail smtps)))
-		 (let ((from (ask-list "from" (nreverse smtps) :default (find-setting *default-smtp*)))
-		       (to (ask-string "receiver"))
-		       (subj (ask-string "subject"))
-		       (body (ask-line "")))
-		   (say "sending now")
-		   (let ((smtp (find-record *smtps* `(,from))))  
-		     (curl:do-handle (h)
-		       (smtp:send-message h
-					  :host (column-value smtp 'host)
-					  :port (column-value smtp 'port)
-					  :user (column-value smtp 'user)
-					  :password (column-value smtp 'password)
-					  :from from
-					  :to to
-					  :subject subj
-					  :body body)
-		       (say "ok")))))))))
+		(let ((from (ask-list "from" (list-smtps) :default (find-setting *default-smtp*)))
+		      (to (ask-string "to"))
+		      (subj (ask-string "subject"))
+		      (body (ask-text "body")))
+		  (say "sending now")
+		  (let ((smtp (find-record *smtps* `(,from))))  
+		    (curl:do-handle (h)
+		      (smtp:send-message h
+					 :host (column-value smtp 'host)
+					 :port (column-value smtp 'port)
+					 :user (column-value smtp 'user)
+					 :password (column-value smtp 'password)
+					 :from from
+					 :to to
+					 :subject subj
+					 :body body)
+		      (say "ok"))))))))
 
 (defun find-command (x)
   (rest (assoc x *commands*)))
@@ -94,16 +112,17 @@
 (defun start ()
   (let-tables ((*settings* (key :primary-key? t) value)
 	       (*smtps* (e-mail :primary-key? t) host port user password))
-    (with-db (nil *settings* *smtps*)
-      (tagbody
-       next
-	 (let ((in (ask "emash> ")))
-           (when (and in (not (string= in "")))
-	     (with-input-from-string (in in)
-	       (let* ((cid (read in))
-		      (c (find-command (kw cid))))
-		 (if c
-		     (do-context () (funcall c))
-		     (say "unknown: ~a" cid)))
-	       (go next)))))
-      (format t "over, out~%"))))
+    (let ((*package* (find-package 'emash)))
+      (with-db ("./" *settings* *smtps*)
+	(tagbody
+	 next
+	   (let ((in (ask-line "emash> ")))
+             (when (and in (not (string= in "")))
+	       (with-input-from-string (in in)
+		 (let* ((cid (read in))
+			(c (find-command (kw cid))))
+		   (if c
+		       (do-context () (funcall c))
+		       (say "unknown: ~a" cid)))
+		 (go next)))))))
+    (format t "over, out~%")))
