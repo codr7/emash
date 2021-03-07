@@ -147,7 +147,7 @@
 	       (*smtps* (e-mail :primary-key? t) host port user password))
     (let ((*package* (find-package 'emash)))
       (with-db ("./" *settings* *smtps*)
-	(say-ok "welcome")
+	(say-ok "hello")
 	(tagbody
 	 next
 	   (let ((in (ask-line "emash> ")))
