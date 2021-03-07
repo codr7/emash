@@ -10,7 +10,6 @@
 (defvar *smtps*)
 
 (defparameter *default-smtp* :default-smtp)
-(defparameter *editor* :editor)
 
 (defun find-setting (key)
   (column-value (find-record *settings* `(,key)) 'value))

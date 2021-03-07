@@ -1,2 +1,9 @@
+* add contacts table
+** loop to-list
+*** display list of matching contacts unless exact match
+*** option 0) *new*
+*** pass :start key to do-records
+**** add whirlog:list-records to create list from do-records
+** add new contacts automagically
 * connect to imap
 ** add imaps table
