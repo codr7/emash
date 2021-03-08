@@ -15,6 +15,7 @@ emash embraces the idea of multiple smtp accounts, add as many as you like.
 All settings are stored in a database rooted in the current working directory.
 
 ```
+hello
 emash> add-smtp
 e-mail: foo@gmail.com
 host: smtp.gmail.com
@@ -38,6 +39,7 @@ subject: testing
 body:
 1 2 3
 
-ok, posted
+posted
 emash>
+bye
 ```

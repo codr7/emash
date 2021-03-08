@@ -122,7 +122,7 @@
 		      (to (mapcar #'symbol-name (read-list (ask-string "to"))))
 		      (subj (ask-string "subject"))
 		      (body (ask-text "body")))
-		  (say-ok "posted-message")
+		  (say-ok "posted")
 		  
 		  (let ((smtp (find-record *smtps* `(,from))))  
 		    (curl:do-handle (h)
